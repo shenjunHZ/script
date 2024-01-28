@@ -4,6 +4,8 @@ import os
 import sys
 import subprocess
 import win32com.client as win32
+import configparser
+import time
 
 ###Object###
 class Usage(Exception):
@@ -36,16 +38,16 @@ class GitOperationArchive(object):
 
 class EmilArchive(object):
     """operation emil"""
-    def __init__(self, title, message):
+    def __init__(self, title, message, receiver):
         self.title = title
         self.message = message
+        self.receiver = receiver
 
     def sendEmil(self):
         outlook = win32.Dispatch("outlook.Application")
         #mail = outlook.CreateItem(win32.constants.olMailItem)
         mail = outlook.CreateItem(0)
-        mail.To = "i_mn_ran_l3_sw_1_cn_12_sg@internal.nsn.com"
-        #mail.To = "erin.yan@nokia-sbell.com"
+        mail.To = self.receiver
         mail.Subject = self.title
         #mail.Body = self.message
         mail.HTMLBody = '''\
@@ -87,6 +89,13 @@ def parseInputParams(opts):
             sys.exit()
     return result
 
+def parseConfigFile():
+    config = configparser.ConfigParser()
+    filePath = os.path.join(os.getcwd() + "\\NotifyNiddUpdate", configFile)
+    config.read(filePath)
+    receiver = config.get('mail', 'receiver')
+    return receiver
+
 def main(argv=None):
     if argv is None:
         argv = sys.argv
@@ -100,12 +109,13 @@ def main(argv=None):
                 fileKey = "CMProductRelease_XML_SBTS5GCP"
                 localFile = archive.searchCurrentFile(fileKey)
                 archive.pullCodeChange()
-                updateFile = archive.searchCurrentFile(fileKey)
-
+                updateFile = archive.searchCurrentFile(fileKey)            
                 if updateFile != localFile:
-                    emilArchive = EmilArchive("Auto send for nidd update!!!", updateFile)
+                    reveiver = parseConfigFile()
+                    emilArchive = EmilArchive("Auto send for nidd update!!!", updateFile, reveiver)
                     emilArchive.sendEmil()
             print("===========================segmentation============================")
+            time.sleep(3)
         except getopt.error:
             msg = getopt.error
             raise Usage(msg)
