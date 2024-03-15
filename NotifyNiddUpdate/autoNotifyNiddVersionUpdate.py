@@ -106,7 +106,7 @@ def main(argv=None):
             if result:
                 archive = GitOperationArchive(codePath)
                 archive.run()
-                fileKey = "CMProductRelease_XML_SBTS5GCP"
+                fileKey = "SBTS5GCP"
                 localFile = archive.searchCurrentFile(fileKey)
                 archive.pullCodeChange()
                 updateFile = archive.searchCurrentFile(fileKey)            
