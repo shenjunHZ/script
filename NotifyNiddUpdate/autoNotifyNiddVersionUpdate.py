@@ -24,8 +24,8 @@ class GitOperationArchive(object):
         else:
             print("Git path invalide!!!")
 
-    def searchCurrentFile(self, fileKey):
-        for root, dirs, files in os.walk(self.extractDir):
+    def searchCurrentFile(self, fileKey, fetchPath):
+        for root, dirs, files in os.walk(fetchPath):
             for file in files:
                 if fileKey in file:
                     return file
@@ -107,9 +107,13 @@ def main(argv=None):
                 archive = GitOperationArchive(codePath)
                 archive.run()
                 fileKey = "SBTS5GCP"
-                localFile = archive.searchCurrentFile(fileKey)
+                fetchPath = codePath + "\\cplane\\oam-if\\npf";
+                localFile = archive.searchCurrentFile(fileKey, fetchPath)
+                print("local nidd file: %s" % (localFile))
                 archive.pullCodeChange()
-                updateFile = archive.searchCurrentFile(fileKey)            
+                #seems file create delay in the path after update.
+                updateFile = archive.searchCurrentFile(fileKey, fetchPath)
+                print("update nidd file: %s" % (updateFile))            
                 if updateFile != localFile:
                     reveiver = parseConfigFile()
                     emilArchive = EmilArchive("Auto send for nidd update!!!", updateFile, reveiver)
